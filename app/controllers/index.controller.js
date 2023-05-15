@@ -61,7 +61,7 @@ exports.onAdWatch = async (req, res) => {
 }
 
 exports.ad = async (req, res) => {
-    Ad.find({ adId: req.params.id })
+    Ad.findOne({ adId: req.params.id })
         .then(result => {
             const data = { status: 'OK', data: result }
             res.send(data);
@@ -75,7 +75,7 @@ exports.ad = async (req, res) => {
 
 
 exports.app = async (req, res) => {
-    App.find({ appId: req.params.id })
+    App.findOne({ appId: req.params.id })
         .then(result => {
             const data = { status: 'OK', data: result }
             res.send(data);
