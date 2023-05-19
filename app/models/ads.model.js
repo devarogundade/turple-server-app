@@ -4,8 +4,17 @@ module.exports = mongoose => {
             type: Number,
             unique: true
         },
+        views: {
+            type: Number,
+            default: 0
+        },
+        clicks: {
+            type: Number,
+            default: 0
+        },
         spent: {
-            type: String
+            type: Number,
+            default: 0
         }
     }, { timestamps: false });
 

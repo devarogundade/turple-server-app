@@ -9,9 +9,11 @@ exports.loadAds = async (req, res) => {
         const appId = req.query.subid.replace('subid_', '')
 
         const app = await graphAPI.getApp(appId)
+
         const ads = await graphAPI.getAds(app.category, app.format)
 
         const data = { status: 'OK', data: ads }
+
         res.send(data)
     } catch (error) {
         res.status(500).send({
@@ -26,7 +28,7 @@ exports.onAdWatch = async (req, res) => {
 
         const result1 = await Ad.findOneAndUpdate(
             { adId: req.query.adid }, // filter
-            { $inc: { spent: fee } }, // data
+            { $inc: { spent: fee, views: 1 } }, // data
             {
                 upsert: true,
                 returnNewDocument: true,
@@ -35,8 +37,8 @@ exports.onAdWatch = async (req, res) => {
         )
 
         const result2 = await App.findOneAndUpdate(
-            { adId: req.query.subid }, // filter
-            { $inc: { earned: fee } }, // data
+            { appId: req.query.subid }, // filter
+            { $inc: { earned: fee, views: 1 } }, // data
             {
                 upsert: true,
                 returnNewDocument: true,
@@ -56,8 +58,42 @@ exports.onAdWatch = async (req, res) => {
             message: err.message || "Some err occurred."
         })
     }
+}
 
+exports.onAdClick = async (req, res) => {
+    try {
+        const result1 = await Ad.findOneAndUpdate(
+            { adId: req.query.adid }, // filter
+            { $inc: { clicks: 1 } }, // data
+            {
+                upsert: true,
+                returnNewDocument: true,
+                returnDocument: "after"
+            } // options
+        )
 
+        const result2 = await App.findOneAndUpdate(
+            { appId: req.query.subid }, // filter
+            { $inc: { clicks: 1 } }, // data
+            {
+                upsert: true,
+                returnNewDocument: true,
+                returnDocument: "after"
+            } // options
+        )
+
+        const data = {
+            status: 'OK',
+            result1: result1,
+            result2: result2
+        }
+
+        res.send(data)
+    } catch (err) {
+        res.status(500).send({
+            message: err.message || "Some err occurred."
+        })
+    }
 }
 
 exports.ad = async (req, res) => {
@@ -73,6 +109,22 @@ exports.ad = async (req, res) => {
         });
 }
 
+exports.createAd = async (req, res) => {
+    const ad = new Ad({
+        adId: Number(req.query.adid)
+    })
+
+    ad.save()
+    .then(result => {
+        const data = { status: 'OK', data: result }
+        res.send(data);
+    })
+    .catch(err => {
+        res.status(500).send({
+            message: err.message || "Some err occurred."
+        });
+    });
+}
 
 exports.app = async (req, res) => {
     App.findOne({ appId: req.params.id })
@@ -85,4 +137,21 @@ exports.app = async (req, res) => {
                 message: err.message || "Some err occurred."
             });
         });
+}
+
+exports.createApp = async (req, res) => {
+    const app = new App({
+        appId: Number(req.query.appid)
+    })
+
+    app.save()
+    .then(result => {
+        const data = { status: 'OK', data: result }
+        res.send(data);
+    })
+    .catch(err => {
+        res.status(500).send({
+            message: err.message || "Some err occurred."
+        });
+    });
 }

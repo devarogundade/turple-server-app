@@ -3,9 +3,18 @@ module.exports = mongoose => {
         appId: {
             type: Number,
             unique: true
+        }, 
+        views: {
+            type: Number,
+            default: 0
+        },
+        clicks: {
+            type: Number,
+            default: 0
         },
         earned: {
-            type: String
+            type: Number,
+            default: 0
         }
     }, { timestamps: false });
 
