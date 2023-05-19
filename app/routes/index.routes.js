@@ -10,6 +10,7 @@ module.exports = app => {
 
     router.get("/loadads", controller.loadAds)
     router.post('/onadwatch', controller.onAdWatch)
+    router.post('/onadclick', controller.onAdClick)
 
     app.use("/", router);
 };

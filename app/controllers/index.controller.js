@@ -6,9 +6,7 @@ const App = db.apps
 
 exports.loadAds = async (req, res) => {
     try {
-        const appId = req.query.subid.replace('subid_', '')
-
-        const app = await graphAPI.getApp(appId)
+        const app = await graphAPI.getApp(req.query.subid.replace('subid_', ''))
 
         const ads = await graphAPI.getAds(app.category, app.format)
 
@@ -37,7 +35,7 @@ exports.onAdWatch = async (req, res) => {
         )
 
         const result2 = await App.findOneAndUpdate(
-            { appId: req.query.subid }, // filter
+            { appId: req.query.subid.replace('subid_', '') }, // filter
             { $inc: { earned: fee, views: 1 } }, // data
             {
                 upsert: true,
@@ -62,9 +60,11 @@ exports.onAdWatch = async (req, res) => {
 
 exports.onAdClick = async (req, res) => {
     try {
+        const fee = req.query.fee ? req.query.fee : 0
+
         const result1 = await Ad.findOneAndUpdate(
             { adId: req.query.adid }, // filter
-            { $inc: { clicks: 1 } }, // data
+            { $inc: { spent: fee, clicks: 1 } }, // data
             {
                 upsert: true,
                 returnNewDocument: true,
@@ -73,8 +73,8 @@ exports.onAdClick = async (req, res) => {
         )
 
         const result2 = await App.findOneAndUpdate(
-            { appId: req.query.subid }, // filter
-            { $inc: { clicks: 1 } }, // data
+            { appId: req.query.subid.replace('subid_', '') }, // filter
+            { $inc: { earned: fee, clicks: 1 } }, // data
             {
                 upsert: true,
                 returnNewDocument: true,
@@ -115,15 +115,15 @@ exports.createAd = async (req, res) => {
     })
 
     ad.save()
-    .then(result => {
-        const data = { status: 'OK', data: result }
-        res.send(data);
-    })
-    .catch(err => {
-        res.status(500).send({
-            message: err.message || "Some err occurred."
+        .then(result => {
+            const data = { status: 'OK', data: result }
+            res.send(data);
+        })
+        .catch(err => {
+            res.status(500).send({
+                message: err.message || "Some err occurred."
+            });
         });
-    });
 }
 
 exports.app = async (req, res) => {
@@ -145,13 +145,13 @@ exports.createApp = async (req, res) => {
     })
 
     app.save()
-    .then(result => {
-        const data = { status: 'OK', data: result }
-        res.send(data);
-    })
-    .catch(err => {
-        res.status(500).send({
-            message: err.message || "Some err occurred."
+        .then(result => {
+            const data = { status: 'OK', data: result }
+            res.send(data);
+        })
+        .catch(err => {
+            res.status(500).send({
+                message: err.message || "Some err occurred."
+            });
         });
-    });
 }
