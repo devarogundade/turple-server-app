@@ -7,7 +7,7 @@ exports.getAds = async (category, format) => {
         const response = await axios.post(BASE_URL,
             {
                 query: `{
-                        adCreateds(where: {state: 1, category: ${category}, format: ${format}}, orderBy: blockNumber) {
+                        adCreateds(where: {state: 2, category: ${category}, format: ${format}}, orderBy: blockNumber) {
                             id
                             adId
                             advertiser
